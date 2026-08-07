@@ -1,0 +1,16 @@
+[
+  {
+    "domain": ".youtube.com",
+    "expirationDate": 1807897210.0,
+    "hostOnly": false,
+    "httpOnly": false,
+    "name": "__Secure-1PAPISID",
+    "path": "/",
+    "sameSite": "unspecified",
+    "secure": true,
+    "session": false,
+    "storeId": "0",
+    "value": "YOUR_COOKIE_VALUE_HERE",
+    "id": 1
+  }
+]

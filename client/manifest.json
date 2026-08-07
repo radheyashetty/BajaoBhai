@@ -1,0 +1,17 @@
+{
+  "name": "Bajao Bhai - Distributed Party Music",
+  "short_name": "Bajao Bhai",
+  "description": "Real-time music queue for parties",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070a",
+  "theme_color": "#00f5a0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data/bajaobhaicreators.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    }
+  ]
+}

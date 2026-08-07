@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lpm-debug.log*
+pnpm-debug.log*
+
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
+cookies.json
+
+# IDE & Tools
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Temporary & Helper files
+tmp/
+temp/
+*.bak
+*.docx
+create_clean_folder.py
+
+# Build outputs
+dist/
+build/
+coverage/

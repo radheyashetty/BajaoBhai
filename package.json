@@ -1,0 +1,56 @@
+{
+  "name": "bajao-bhai",
+  "version": "1.0.0",
+  "description": "A real-time music queue application for parties with distributed architecture, featuring voting, live queue management, and automatic host selection.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "lint": "eslint server/**/*.js client/*.js --ext .js",
+    "format": "prettier --write server/**/*.js client/*.js",
+    "test": "npm run lint"
+  },
+  "keywords": [
+    "music",
+    "party",
+    "queue",
+    "voting",
+    "realtime",
+    "socket.io",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/bajao-bhai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/bajao-bhai/issues"
+  },
+  "homepage": "https://github.com/yourusername/bajao-bhai#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "compression": "^1.8.1",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
+    "node-fetch": "^2.7.0",
+    "socket.io": "^4.8.3",
+    "xss": "^1.0.15",
+    "youtube-dl-exec": "^3.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.1"
+  }
+}

@@ -1,0 +1,14 @@
+/* ================= CONSTANTS ================= */
+export const PROGRESS_INTERVAL_MS = 500;
+export const PROGRESS_EMIT_INTERVAL = 2000;
+export const SEARCH_DEBOUNCE_MS = 250;
+export const TOAST_DURATION_MS = 2200;
+export const HARD_SYNC_DRIFT_SECONDS = 1.5;
+export const SOFT_SYNC_DRIFT_SECONDS = 0.45;
+export const GUEST_SYNC_CHECK_INTERVAL_MS = 1500;
+export const SMOOTH_SYNC_DRIFT_SECONDS = 0.35;
+export const STABLE_SYNC_DRIFT_SECONDS = 0.2;
+export const RATE_SYNC_DRIFT_SECONDS = 0.9;
+export const MICRO_SYNC_MAX_STEP_SECONDS = 0.25;
+export const HARD_SYNC_COOLDOWN_MS = 2800;
+export const STABLE_SYNC_TICKS_TO_RESET = 2;

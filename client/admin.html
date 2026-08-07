@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05070a">
+    <title>Bajao Bhai - Admin Panel</title>
+    <link rel="icon" href="data/bajaobhaicreators.jpeg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bricolage+Grotesque:wght@500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body">
+    <main class="container py-4 py-md-5">
+        <section id="admin-auth" class="glass-panel p-4 p-md-5 admin-auth-shell mx-auto">
+            <div class="text-center mb-4">
+                <img src="data/bajaobhaicreators.jpeg" alt="Bajao Bhai logo" class="project-logo mx-auto mb-3">
+                <h1 class="admin-page-title mb-1">Admin Control</h1>
+                <p class="text-muted mb-0">Enter admin key to unlock moderation tools.</p>
+            </div>
+            <div class="mb-3">
+                <label for="admin-key-input" class="form-label">Admin Key</label>
+                <input id="admin-key-input" type="password" class="form-control custom-input" placeholder="Enter ADMIN_SECRET">
+            </div>
+            <div class="d-grid gap-2">
+                <button id="admin-login-btn" class="btn btn-glow text-dark fw-semibold">Access Dashboard</button>
+                <a href="index.html" class="btn btn-outline-light">Back to Home</a>
+            </div>
+            <div id="auth-msg" class="small text-danger mt-3"></div>
+        </section>
+
+        <section id="admin-dashboard" class="d-none">
+            <nav class="glass-nav admin-nav px-3 px-md-4 py-3 sticky-top z-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <div>
+                        <div class="fw-bold fs-5 brand-title tracking-tight">ADMIN DASHBOARD</div>
+                        <div class="text-muted small">Only actions backed by live server routes are shown here.</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap admin-toolbar">
+                        <div class="d-flex align-items-center gap-2 me-2">
+                            <span class="fs-8 text-muted fw-bold text-uppercase">API</span>
+                            <div id="playback-mode-toggle" class="glow-switch" onclick="togglePlaybackMode()">
+                                <div class="switch-track">
+                                    <div class="switch-handle"></div>
+                                </div>
+                            </div>
+                            <span class="fs-8 text-muted fw-bold text-uppercase">Stream</span>
+                        </div>
+                        <span id="ping-display" class="badge bg-secondary">Ping: --</span>
+                        <button id="btn-refresh" class="btn btn-outline-light btn-sm">Refresh</button>
+                        <button id="btn-end-all" class="btn btn-outline-warning btn-sm">End All Active</button>
+                        <button id="btn-reset-all" class="btn btn-danger btn-sm">Reset All Data</button>
+                        <button id="btn-logout" class="btn btn-outline-info btn-sm">Logout</button>
+                    </div>
+                </div>
+            </nav>
+
+            <section class="mb-3">
+                <div class="row g-2" id="overview-cards"></div>
+            </section>
+
+            <section class="mb-3">
+                <div class="glass-panel p-3 admin-block">
+                    <h5 class="mb-3">Live System Load Monitor</h5>
+                    <div style="position: relative; height:250px; width:100%">
+                        <canvas id="loadChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-3">
+                <div class="glass-panel p-3 admin-block">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div>
+                            <h5 class="mb-0">Historical Trends</h5>
+                            <small class="text-muted">Persistent snapshots recorded every 60s</small>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Time range">
+                            <button type="button" class="btn btn-outline-light active" onclick="loadHistoryChart(24)">24h</button>
+                            <button type="button" class="btn btn-outline-light" onclick="loadHistoryChart(168)">7d</button>
+                            <button type="button" class="btn btn-outline-light" onclick="loadHistoryChart(720)">30d</button>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-4"><div class="glass-panel p-2 text-center"><small class="text-muted d-block">Peak Sockets</small><span id="peak-sockets" class="fw-bold text-info">0</span></div></div>
+                        <div class="col-4"><div class="glass-panel p-2 text-center"><small class="text-muted d-block">Peak Memory</small><span id="peak-memory" class="fw-bold text-warning">0 MB</span></div></div>
+                        <div class="col-4"><div class="glass-panel p-2 text-center"><small class="text-muted d-block">Peak Users</small><span id="peak-users" class="fw-bold text-success">0</span></div></div>
+                    </div>
+                    <div style="position: relative; height:280px; width:100%">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-3">
+                <div id="action-feedback" class="glass-panel p-3 text-muted">No actions yet.</div>
+            </section>
+
+            <section class="mb-3">
+                <div class="glass-panel p-3 admin-block">
+                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
+                        <div>
+                            <h5 class="mb-0">Database Explorer</h5>
+                            <small class="text-muted">View table data and clear a table when needed.</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button id="btn-refresh-db" class="btn btn-outline-light btn-sm">Refresh Tables</button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div id="db-tables-list" class="d-flex flex-column gap-2 admin-list-scroll"></div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                                <input id="db-search-input" type="text" class="form-control form-control-sm custom-input" placeholder="Search in selected table" style="max-width: 280px;">
+                                <select id="db-sort-by" class="form-select form-select-sm custom-input" style="max-width: 180px;"></select>
+                                <select id="db-sort-dir" class="form-select form-select-sm custom-input" style="max-width: 120px;">
+                                    <option value="desc">Desc</option>
+                                    <option value="asc">Asc</option>
+                                </select>
+                                <button id="btn-db-apply-sort" class="btn btn-sm btn-outline-light">Apply Sort</button>
+                                <button id="btn-db-search" class="btn btn-sm btn-outline-light">Search</button>
+                                <button id="btn-db-clear-search" class="btn btn-sm btn-outline-secondary">Clear</button>
+                                <button id="btn-db-prev" class="btn btn-sm btn-outline-light">Prev</button>
+                                <button id="btn-db-next" class="btn btn-sm btn-outline-light">Next</button>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                                <div id="db-selected-meta" class="small text-muted">Select a table to inspect rows.</div>
+                                <button id="btn-clear-selected-table" class="btn btn-sm btn-outline-danger" disabled>Clear Selected Table</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-dark table-striped align-middle">
+                                    <thead id="db-preview-head"></thead>
+                                    <tbody id="db-preview-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row g-4">
+                <div class="col-lg-7">
+                    <div class="glass-panel p-3 admin-block">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Parties</h5>
+                            <span class="small text-muted">End, resume, or delete</span>
+                        </div>
+                        <div id="parties-list" class="d-flex flex-column gap-2 admin-list-scroll"></div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="glass-panel p-3 admin-block">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Users</h5>
+                            <span class="small text-muted">Make host or remove</span>
+                        </div>
+                        <div id="users-list" class="d-flex flex-column gap-2 admin-list-scroll"></div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+    const state = {
+        token: localStorage.getItem('admin_token') || '',
+        parties: [],
+        users: [],
+        dbTables: [],
+        selectedTable: '',
+        selectedRows: [],
+        selectedTablePk: '',
+        selectedTableCanDeleteRows: false,
+        dbSearchQuery: '',
+        dbLimit: 50,
+        dbOffset: 0,
+        dbTotal: 0,
+        dbSortBy: '',
+        dbSortDir: 'desc',
+        dbAvailableSortColumns: [],
+        timer: null,
+        loading: false,
+        chartData: {
+            labels: [],
+            memory: [],
+            sockets: []
+        }
+    };
+
+    const el = {
+        auth: document.getElementById('admin-auth'),
+        dash: document.getElementById('admin-dashboard'),
+        keyInput: document.getElementById('admin-key-input'),
+        loginBtn: document.getElementById('admin-login-btn'),
+        authMsg: document.getElementById('auth-msg'),
+        refreshBtn: document.getElementById('btn-refresh'),
+        endAllBtn: document.getElementById('btn-end-all'),
+        resetAllBtn: document.getElementById('btn-reset-all'),
+        logoutBtn: document.getElementById('btn-logout'),
+        refreshDbBtn: document.getElementById('btn-refresh-db'),
+        clearSelectedTableBtn: document.getElementById('btn-clear-selected-table'),
+        dbSearchInput: document.getElementById('db-search-input'),
+        dbSearchBtn: document.getElementById('btn-db-search'),
+        dbClearSearchBtn: document.getElementById('btn-db-clear-search'),
+        dbPrevBtn: document.getElementById('btn-db-prev'),
+        dbNextBtn: document.getElementById('btn-db-next'),
+        dbSortBy: document.getElementById('db-sort-by'),
+        dbSortDir: document.getElementById('db-sort-dir'),
+        dbApplySortBtn: document.getElementById('btn-db-apply-sort'),
+        ping: document.getElementById('ping-display'),
+        feedback: document.getElementById('action-feedback'),
+        cards: document.getElementById('overview-cards'),
+        parties: document.getElementById('parties-list'),
+        users: document.getElementById('users-list'),
+        dbTables: document.getElementById('db-tables-list'),
+        dbMeta: document.getElementById('db-selected-meta'),
+        dbHead: document.getElementById('db-preview-head'),
+        dbBody: document.getElementById('db-preview-body'),
+    };
+
+    function esc(v) {
+        return String(v || '').replace(/[&<>"']/g, (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    let loadChartInstance = null;
+    function initChart() {
+        const ctx = document.getElementById('loadChart').getContext('2d');
+        loadChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: state.chartData.labels,
+                datasets: [
+                    {
+                        label: 'Heap Used (MB)',
+                        data: state.chartData.memory,
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderWidth: 2,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Active Sockets',
+                        data: state.chartData.sockets,
+                        borderColor: '#0dcaf0',
+                        backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                        borderWidth: 2,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                color: '#fff',
+                scales: {
+                    x: {
+                        ticks: { color: '#adb5bd' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Memory (MB)', color: '#adb5bd' },
+                        ticks: { color: '#adb5bd' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Sockets', color: '#adb5bd' },
+                        ticks: { color: '#adb5bd', stepSize: 1 },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#fff' } }
+                }
+            }
+        });
+    }
+
+    function updateChart(analytics) {
+        if (!loadChartInstance) initChart();
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        
+        state.chartData.labels.push(timeStr);
+        state.chartData.memory.push(analytics?.memory?.heapUsedMB || 0);
+        state.chartData.sockets.push(analytics?.activeSockets || 0);
+
+        if (state.chartData.labels.length > 30) {
+            state.chartData.labels.shift();
+            state.chartData.memory.shift();
+            state.chartData.sockets.shift();
+        }
+
+        loadChartInstance.update();
+    }
+
+    let historyChartInstance = null;
+    async function loadHistoryChart(hours = 24) {
+        // Update active button state
+        const btnGroup = document.querySelector('[aria-label="Time range"]');
+        if (btnGroup) {
+            btnGroup.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            const match = btnGroup.querySelector(`[onclick="loadHistoryChart(${hours})"]`);
+            if (match) match.classList.add('active');
+        }
+
+        try {
+            const data = await adminRequest(`/api/v1/admin/analytics/history?hours=${hours}`);
+            const snapshots = data.snapshots || [];
+
+            // Update peak cards
+            const peakSockets = document.getElementById('peak-sockets');
+            const peakMemory = document.getElementById('peak-memory');
+            const peakUsers = document.getElementById('peak-users');
+            if (peakSockets) peakSockets.textContent = data.peaks?.sockets || 0;
+            if (peakMemory) peakMemory.textContent = (data.peaks?.memoryMB || 0) + ' MB';
+            if (peakUsers) peakUsers.textContent = data.peaks?.users || 0;
+
+            const labels = snapshots.map(s => {
+                const d = new Date(s.recorded_at + 'Z');
+                if (hours <= 24) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            });
+            const memoryData = snapshots.map(s => s.heap_used_mb);
+            const socketsData = snapshots.map(s => s.active_sockets);
+            const usersData = snapshots.map(s => s.online_users);
+
+            if (historyChartInstance) {
+                historyChartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            historyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Heap (MB)',
+                            data: memoryData,
+                            borderColor: '#ffc107',
+                            backgroundColor: 'rgba(255, 193, 7, 0.08)',
+                            borderWidth: 1.5,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: snapshots.length > 100 ? 0 : 2,
+                        },
+                        {
+                            label: 'Sockets',
+                            data: socketsData,
+                            borderColor: '#0dcaf0',
+                            backgroundColor: 'rgba(13, 202, 240, 0.08)',
+                            borderWidth: 1.5,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: snapshots.length > 100 ? 0 : 2,
+                        },
+                        {
+                            label: 'Online Users',
+                            data: usersData,
+                            borderColor: '#198754',
+                            backgroundColor: 'rgba(25, 135, 84, 0.08)',
+                            borderWidth: 1.5,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: snapshots.length > 100 ? 0 : 2,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    color: '#fff',
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: {
+                            ticks: { color: '#adb5bd', maxTicksLimit: 12, maxRotation: 0 },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            ticks: { color: '#adb5bd' },
+                            grid: { color: 'rgba(255,255,255,0.08)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#fff', boxWidth: 12 } },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('loadHistoryChart error:', err);
+        }
+    }
+
+    function notify(message, error = false) {
+        el.feedback.innerHTML = `<span class="badge ${error ? 'bg-danger' : 'bg-success'} me-2">${error ? 'Error' : 'Done'}</span>${esc(message)}`;
+    }
+
+    function setAuthMode(authorized) {
+        el.auth.classList.toggle('d-none', authorized);
+        el.dash.classList.toggle('d-none', !authorized);
+        if (!authorized) {
+            stopPolling();
+        }
+    }
+
+    async function adminRequest(path, options = {}) {
+        const response = await fetch(path, {
+            ...options,
+            headers: {
+                Authorization: `Bearer ${state.token}`,
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+            localStorage.removeItem('admin_token');
+            state.token = '';
+            setAuthMode(false);
+            throw new Error('Invalid admin key');
+        }
+        if (!response.ok) {
+            throw new Error(data.error || `Request failed (${response.status})`);
+        }
+        return data;
+    }
+
+    function card(label, value) {
+        return `<div class="col-6 col-md-4 col-xl-2"><div class="glass-panel admin-stat-card p-3 text-center"><small class="text-muted">${esc(label)}</small><div class="fs-5 fw-semibold">${esc(value)}</div></div></div>`;
+    }
+
+    function renderCards(analytics) {
+        const counts = analytics?.counts || {};
+        const mem = analytics?.memory || {};
+        const up = analytics?.system?.uptime || 0;
+        const onlineUsers = state.users.filter((u) => Number(u.is_online) === 1).length;
+        el.cards.innerHTML = [
+            card('Parties', state.parties.length),
+            card('Online Users', onlineUsers),
+            card('Total Users', state.users.length),
+            card('Songs', counts.songs || 0),
+            card('Votes', counts.votes || 0),
+            card('Heap Used', `${mem.heapUsedMB || 0} MB`),
+            card('Sockets', analytics?.activeSockets || 0),
+            card('Uptime', `${up}s`),
+        ].join('');
+    }
+
+    function usersByParty(partyCode) {
+        return state.users.filter((u) => String(u.party_code || '').toUpperCase() === String(partyCode || '').toUpperCase());
+    }
+
+    function renderParties() {
+        if (!state.parties.length) {
+            el.parties.innerHTML = '<div class="text-muted">No parties found.</div>';
+            return;
+        }
+
+        el.parties.innerHTML = state.parties.map((p) => {
+            const code = esc(p.party_code);
+            const status = String(p.status || 'unknown').toLowerCase();
+            const users = usersByParty(p.party_code);
+            const hostCandidates = users.filter((u) => String(u.role || '').toLowerCase() !== 'host');
+            const options = hostCandidates.map((u) => `<option value="${u.user_id}">${esc(u.username)} (#${u.user_id})</option>`).join('');
+
+            return `
+                <div class="glass-panel p-3 rounded-3 admin-party-row">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                            <div class="fw-semibold font-monospace">${code}</div>
+                            <small class="text-muted">${esc(p.party_name || 'Untitled')} · ${Number(p.active_users) || 0} online</small>
+                        </div>
+                        <span class="badge ${status === 'active' ? 'bg-success' : 'bg-secondary'}">${esc(status)}</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <button class="btn btn-sm btn-outline-warning" onclick="endParty('${code}')">End Party</button>
+                        <button class="btn btn-sm btn-outline-info" onclick="setPartyStatus('${code}','active')">Set Active</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="setPartyStatus('${code}','ended')">Set Ended</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteParty('${code}')">Delete Party</button>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <select class="form-select form-select-sm admin-host-select" id="host-select-${code}">
+                            <option value="">Select new host</option>
+                            ${options}
+                        </select>
+                        <button class="btn btn-sm btn-outline-light" onclick="transferHost('${code}')">Transfer Host</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderUsers() {
+        if (!state.users.length) {
+            el.users.innerHTML = '<div class="text-muted">No users found.</div>';
+            return;
+        }
+
+        el.users.innerHTML = state.users.map((u) => `
+            <div class="glass-panel p-2 rounded-3 d-flex justify-content-between align-items-center gap-2">
+                <div class="small">
+                    <span class="badge ${Number(u.is_online) === 1 ? 'bg-success' : 'bg-secondary'} me-2">${Number(u.is_online) === 1 ? 'online' : 'offline'}</span>
+                    <strong>${esc(u.username)}</strong>
+                    <span class="text-muted">(${esc(u.party_code)})</span>
+                    ${String(u.role || '').toLowerCase() === 'host' ? '<span class="badge bg-warning text-dark ms-2">host</span>' : ''}
+                </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="kickUser(${Number(u.user_id)})">Kick</button>
+            </div>
+        `).join('');
+    }
+
+    function renderDbTables() {
+        if (!state.dbTables.length) {
+            el.dbTables.innerHTML = '<div class="text-muted">No table data available.</div>';
+            return;
+        }
+
+        el.dbTables.innerHTML = state.dbTables.map((entry) => {
+            const selected = state.selectedTable === entry.table;
+            return `
+                <button class="btn ${selected ? 'btn-light text-dark' : 'btn-outline-light'} btn-sm text-start d-flex justify-content-between align-items-center" onclick="selectDbTable('${esc(entry.table)}')">
+                    <span class="font-monospace">${esc(entry.table)}</span>
+                    <span class="badge ${selected ? 'bg-dark text-light' : 'bg-secondary'}">${Number(entry.count) || 0}</span>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function renderDbPreview() {
+        const selected = state.selectedTable;
+        if (!selected) {
+            el.dbMeta.textContent = 'Select a table to inspect rows.';
+            el.dbHead.innerHTML = '';
+            el.dbBody.innerHTML = '';
+            el.clearSelectedTableBtn.disabled = true;
+            return;
+        }
+
+        const rows = state.selectedRows || [];
+        const headers = rows.length ? Object.keys(rows[0]) : [];
+        const end = Math.min(state.dbOffset + state.dbLimit, state.dbTotal);
+        const rangeLabel = state.dbTotal ? `${state.dbOffset + 1}-${end}` : '0';
+        const searchSuffix = state.dbSearchQuery ? ` · search: "${state.dbSearchQuery}"` : '';
+
+        el.dbMeta.textContent = `${selected} · rows ${rangeLabel} of ${state.dbTotal}${searchSuffix}`;
+        el.clearSelectedTableBtn.disabled = false;
+        el.dbPrevBtn.disabled = state.dbOffset <= 0;
+        el.dbNextBtn.disabled = state.dbOffset + state.dbLimit >= state.dbTotal;
+
+        if (!headers.length) {
+            el.dbHead.innerHTML = '<tr><th class="small text-muted">No rows</th></tr>';
+            el.dbBody.innerHTML = '<tr><td class="text-muted small">This table is empty.</td></tr>';
+            return;
+        }
+
+        const canDeleteRows = Boolean(state.selectedTableCanDeleteRows && state.selectedTablePk);
+        const displayHeaders = canDeleteRows ? [...headers, '__actions__'] : headers;
+
+        el.dbHead.innerHTML = `<tr>${displayHeaders.map((h) => `<th class="small">${h === '__actions__' ? 'Actions' : esc(h)}</th>`).join('')}</tr>`;
+        el.dbBody.innerHTML = rows.map((row) => {
+            const rowCells = headers.map((h) => `<td class="small">${esc(row[h])}</td>`).join('');
+            if (!canDeleteRows) {
+                return `<tr>${rowCells}</tr>`;
+            }
+
+            const rowIdRaw = row[state.selectedTablePk];
+            const rowId = Number.parseInt(rowIdRaw, 10);
+            const disabled = Number.isInteger(rowId) && rowId > 0 ? '' : 'disabled';
+            const actionCell = `<td><button class="btn btn-sm btn-outline-danger" ${disabled} onclick="deleteDbRow(${Number.isInteger(rowId) ? rowId : 0})">Delete Row</button></td>`;
+            return `<tr>${rowCells}${actionCell}</tr>`;
+        }).join('');
+    }
+
+    function renderDbSortControls() {
+        const columns = state.dbAvailableSortColumns || [];
+        if (!columns.length) {
+            el.dbSortBy.innerHTML = '<option value="">Sort column</option>';
+            el.dbSortBy.disabled = true;
+            el.dbApplySortBtn.disabled = true;
+            return;
+        }
+
+        el.dbSortBy.disabled = false;
+        el.dbApplySortBtn.disabled = false;
+
+        const sortByOptions = columns.map((col) => {
+            const selected = state.dbSortBy === col ? 'selected' : '';
+            return `<option value="${esc(col)}" ${selected}>${esc(col)}</option>`;
+        }).join('');
+        el.dbSortBy.innerHTML = sortByOptions;
+
+        el.dbSortDir.value = state.dbSortDir === 'asc' ? 'asc' : 'desc';
+    }
+
+    async function refreshDbTables() {
+        if (!state.token) return;
+        const data = await adminRequest('/api/v1/admin/db/tables');
+        state.dbTables = data.tables || [];
+        if (!state.selectedTable && state.dbTables.length) {
+            state.selectedTable = state.dbTables[0].table;
+        }
+        renderDbTables();
+        if (state.selectedTable) {
+            await loadDbTableRows(state.selectedTable, {
+                offset: state.dbOffset,
+                limit: state.dbLimit,
+                q: state.dbSearchQuery,
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+        } else {
+            renderDbSortControls();
+            renderDbPreview();
+        }
+    }
+
+    async function loadDbTableRows(tableName, options = {}) {
+        const safeTable = String(tableName || '').trim().toLowerCase();
+        if (!safeTable) return;
+        const limit = Number.isInteger(options.limit) ? options.limit : state.dbLimit;
+        const offset = Number.isInteger(options.offset) ? options.offset : state.dbOffset;
+        const q = typeof options.q === 'string' ? options.q : state.dbSearchQuery;
+        const sortBy = typeof options.sortBy === 'string' ? options.sortBy : state.dbSortBy;
+        const sortDir = options.sortDir === 'asc' ? 'asc' : options.sortDir === 'desc' ? 'desc' : state.dbSortDir;
+        const params = new URLSearchParams({
+            limit: String(limit),
+            offset: String(offset),
+        });
+        if (q) params.set('q', q);
+        if (sortBy) params.set('sortBy', sortBy);
+        params.set('sortDir', sortDir || 'desc');
+
+        const data = await adminRequest(`/api/v1/admin/db/tables/${encodeURIComponent(safeTable)}?${params.toString()}`);
+        state.selectedTable = data.table || safeTable;
+        state.selectedRows = data.rows || [];
+        state.selectedTablePk = data.rowPrimaryKey || '';
+        state.selectedTableCanDeleteRows = Boolean(data.canDeleteRows);
+        state.dbLimit = data?.pagination?.limit || limit;
+        state.dbOffset = data?.pagination?.offset || offset;
+        state.dbTotal = data?.pagination?.total || 0;
+        state.dbSearchQuery = data?.search?.query || q || '';
+        state.dbAvailableSortColumns = data?.sort?.availableColumns || [];
+        state.dbSortBy = data?.sort?.by || sortBy || state.dbAvailableSortColumns[0] || '';
+        state.dbSortDir = data?.sort?.dir || sortDir || 'desc';
+        el.dbSearchInput.value = state.dbSearchQuery;
+        renderDbSortControls();
+        renderDbTables();
+        renderDbPreview();
+    }
+
+    async function selectDbTable(tableName) {
+        try {
+            state.dbOffset = 0;
+            await loadDbTableRows(tableName, { offset: 0, sortBy: '', sortDir: 'desc' });
+        } catch (err) {
+            notify(err.message || 'Failed to load table rows', true);
+        }
+    }
+
+    async function applyDbSort() {
+        if (!state.selectedTable) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        state.dbOffset = 0;
+        state.dbSortBy = String(el.dbSortBy.value || '').trim();
+        state.dbSortDir = String(el.dbSortDir.value || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+        try {
+            await loadDbTableRows(state.selectedTable, {
+                offset: 0,
+                q: state.dbSearchQuery,
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+        } catch (err) {
+            notify(err.message || 'Sort update failed', true);
+        }
+    }
+
+    async function searchSelectedTable() {
+        if (!state.selectedTable) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        state.dbOffset = 0;
+        state.dbSearchQuery = String(el.dbSearchInput.value || '').trim();
+        try {
+            await loadDbTableRows(state.selectedTable, {
+                offset: 0,
+                q: state.dbSearchQuery,
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+        } catch (err) {
+            notify(err.message || 'Search failed', true);
+        }
+    }
+
+    async function clearTableSearch() {
+        if (!state.selectedTable) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        state.dbOffset = 0;
+        state.dbSearchQuery = '';
+        el.dbSearchInput.value = '';
+        try {
+            await loadDbTableRows(state.selectedTable, {
+                offset: 0,
+                q: '',
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+        } catch (err) {
+            notify(err.message || 'Failed to clear search', true);
+        }
+    }
+
+    async function goDbPage(direction) {
+        if (!state.selectedTable) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        const nextOffset = direction === 'next'
+            ? state.dbOffset + state.dbLimit
+            : Math.max(state.dbOffset - state.dbLimit, 0);
+
+        if (nextOffset === state.dbOffset) return;
+
+        try {
+            await loadDbTableRows(state.selectedTable, {
+                offset: nextOffset,
+                q: state.dbSearchQuery,
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+        } catch (err) {
+            notify(err.message || 'Page load failed', true);
+        }
+    }
+
+    async function clearSelectedTable() {
+        const tableName = String(state.selectedTable || '').trim();
+        if (!tableName) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        if (!confirm(`Clear table ${tableName}? This cannot be undone.`)) return;
+        const check = prompt(`Type CLEAR ${tableName.toUpperCase()} to confirm`);
+        if (String(check || '').trim().toUpperCase() !== `CLEAR ${tableName.toUpperCase()}`) {
+            notify('Table clear cancelled', true);
+            return;
+        }
+
+        try {
+            const data = await adminRequest(`/api/v1/admin/db/tables/${encodeURIComponent(tableName)}?confirm=YES_CLEAR_TABLE`, {
+                method: 'DELETE',
+            });
+            notify(data.message || `Cleared ${tableName}`);
+            await refreshDbTables();
+            await refreshData();
+        } catch (err) {
+            notify(err.message || 'Failed to clear table', true);
+        }
+    }
+
+    async function deleteDbRow(rowId) {
+        const tableName = String(state.selectedTable || '').trim();
+        if (!tableName) {
+            notify('Select a table first', true);
+            return;
+        }
+
+        const parsedRowId = Number.parseInt(rowId, 10);
+        if (!Number.isInteger(parsedRowId) || parsedRowId <= 0) {
+            notify('Invalid row id', true);
+            return;
+        }
+
+        if (!confirm(`Delete row ${parsedRowId} from ${tableName}?`)) return;
+
+        try {
+            const data = await adminRequest(`/api/v1/admin/db/tables/${encodeURIComponent(tableName)}/rows/${parsedRowId}?confirm=YES_DELETE_ROW`, {
+                method: 'DELETE',
+            });
+            notify(data.message || 'Row deleted');
+            const adjustedOffset = state.dbOffset > 0 && state.selectedRows.length <= 1
+                ? Math.max(state.dbOffset - state.dbLimit, 0)
+                : state.dbOffset;
+            await loadDbTableRows(tableName, {
+                offset: adjustedOffset,
+                q: state.dbSearchQuery,
+                sortBy: state.dbSortBy,
+                sortDir: state.dbSortDir,
+            });
+            await refreshData();
+        } catch (err) {
+            notify(err.message || 'Failed to delete row', true);
+        }
+    }
+
+    async function refreshData() {
+        if (!state.token || state.loading) return;
+        state.loading = true;
+        try {
+            const [partiesData, usersData, analytics, modeData] = await Promise.all([
+                adminRequest('/api/v1/admin/parties'),
+                adminRequest('/api/v1/admin/users?limit=400'),
+                adminRequest('/api/v1/admin/analytics'),
+                adminRequest('/api/v1/admin/playback-mode'),
+            ]);
+
+            state.parties = partiesData.parties || [];
+            state.users = usersData.users || [];
+            
+            // Update toggle switch state based on mode
+            const toggleWrapper = document.getElementById('playback-mode-toggle');
+            if (toggleWrapper) {
+                if (modeData.mode === 'stream') {
+                    toggleWrapper.classList.add('active');
+                } else {
+                    toggleWrapper.classList.remove('active');
+                }
+            }
+
+            renderCards(analytics || {});
+            updateChart(analytics || {});
+            if (!historyChartInstance) loadHistoryChart(24);
+            renderParties();
+            renderUsers();
+            await refreshDbTables();
+        } catch (err) {
+            notify(err.message || 'Failed to load admin data', true);
+        } finally {
+            state.loading = false;
+        }
+    }
+
+    async function measurePing() {
+        const start = Date.now();
+        try {
+            await fetch('/api/v1/ping');
+            el.ping.textContent = `Ping: ${Date.now() - start}ms`;
+        } catch {
+            el.ping.textContent = 'Ping: error';
+        }
+    }
+
+    function startPolling() {
+        stopPolling();
+        refreshData();
+        measurePing();
+        state.timer = setInterval(() => {
+            if (document.hidden) return;
+            refreshData();
+            measurePing();
+        }, 10000);
+    }
+
+    function stopPolling() {
+        if (state.timer) {
+            clearInterval(state.timer);
+            state.timer = null;
+        }
+    }
+
+    async function login() {
+        const tokenInput = String(el.keyInput.value || '').trim();
+        if (!tokenInput) {
+            el.authMsg.textContent = 'Admin key is required.';
+            return;
+        }
+
+        el.authMsg.textContent = '';
+        el.loginBtn.disabled = true;
+        el.loginBtn.textContent = 'Verifying...';
+
+        try {
+            // Use dedicated login endpoint that trims whitespace server-side
+            const response = await fetch('/api/v1/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: tokenInput }),
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(data.error || `Login failed (${response.status})`);
+            }
+
+            // Use the server-validated token
+            state.token = data.token || tokenInput;
+            localStorage.setItem('admin_token', state.token);
+            el.keyInput.value = state.token;
+
+            setAuthMode(true);
+            notify('Admin session started');
+            startPolling();
+        } catch (err) {
+            el.authMsg.textContent = err.message || 'Login failed. Check your admin key.';
+            localStorage.removeItem('admin_token');
+            state.token = '';
+            setAuthMode(false);
+        } finally {
+            el.loginBtn.disabled = false;
+            el.loginBtn.textContent = 'Access Dashboard';
+        }
+    }
+
+    function logout() {
+        stopPolling();
+        localStorage.removeItem('admin_token');
+        state.token = '';
+        setAuthMode(false);
+        el.keyInput.value = '';
+    }
+
+    async function endParty(code) {
+        try {
+            const data = await adminRequest(`/api/v1/admin/parties/${code}/end`, { method: 'POST' });
+            notify(data.message || 'Party ended');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'End party failed', true);
+        }
+    }
+
+    async function setPartyStatus(code, status) {
+        try {
+            const data = await adminRequest(`/api/v1/admin/parties/${code}/status`, {
+                method: 'POST',
+                body: JSON.stringify({ status }),
+            });
+            notify(data.message || 'Status updated');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Status update failed', true);
+        }
+    }
+
+    async function deleteParty(code) {
+        if (!confirm(`Delete party ${code}? This cannot be undone.`)) return;
+        try {
+            const data = await adminRequest(`/api/v1/admin/parties/${code}`, { method: 'DELETE' });
+            notify(data.message || 'Party deleted');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Delete party failed', true);
+        }
+    }
+
+    async function transferHost(code) {
+        const select = document.getElementById(`host-select-${code}`);
+        const userId = Number.parseInt(select?.value || '', 10);
+        if (!Number.isInteger(userId)) {
+            notify('Select a valid user to transfer host', true);
+            return;
+        }
+
+        try {
+            const data = await adminRequest(`/api/v1/admin/parties/${code}/host`, {
+                method: 'POST',
+                body: JSON.stringify({ userId }),
+            });
+            notify(data.message || 'Host transferred');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Host transfer failed', true);
+        }
+    }
+
+    async function kickUser(userId) {
+        if (!confirm(`Kick user #${userId}?`)) return;
+        try {
+            const data = await adminRequest(`/api/v1/admin/users/${userId}`, { method: 'DELETE' });
+            notify(data.message || 'User removed');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Kick failed', true);
+        }
+    }
+
+    async function endAllParties() {
+        if (!confirm('End all active parties now?')) return;
+        try {
+            const data = await adminRequest('/api/v1/admin/parties/end-all', { method: 'POST' });
+            notify(data.message || 'All active parties ended');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Failed to end all parties', true);
+        }
+    }
+
+    async function resetAllData() {
+        if (!confirm('This permanently deletes all parties, users, songs, votes, and reactions. Continue?')) return;
+        const check = prompt('Type RESET to confirm');
+        if (String(check || '').trim().toUpperCase() !== 'RESET') {
+            notify('Reset cancelled', true);
+            return;
+        }
+
+        try {
+            const data = await adminRequest('/api/v1/admin/all?confirm=YES_DELETE_ALL', { method: 'DELETE' });
+            notify(data.message || 'System reset complete');
+            refreshData();
+        } catch (err) {
+            notify(err.message || 'Reset failed', true);
+        }
+    }
+
+    async function togglePlaybackMode() {
+        const currentMode = document.getElementById('playback-mode-toggle').classList.contains('active') ? 'stream' : 'api';
+        const nextMode = currentMode === 'api' ? 'stream' : 'api';
+        await setPlaybackMode(nextMode);
+    }
+
+    async function setPlaybackMode(mode) {
+        // Immediate visual feedback
+        const toggle = document.getElementById('playback-mode-toggle');
+        const wasActive = toggle.classList.contains('active');
+        
+        if (mode === 'stream') {
+            toggle.classList.add('active');
+        } else {
+            toggle.classList.remove('active');
+        }
+
+        try {
+            const data = await adminRequest('/api/v1/admin/playback-mode', {
+                method: 'POST',
+                body: JSON.stringify({ mode })
+            });
+            notify(data.message || `Switched to ${mode}`);
+            refreshData();
+        } catch (err) {
+            // Revert on failure
+            if (wasActive) toggle.classList.add('active');
+            else toggle.classList.remove('active');
+            
+            let errMsg = err.message || 'Failed to switch mode';
+            if (errMsg.includes('401')) {
+                errMsg = 'Invalid Admin Key. Please re-login.';
+            }
+            notify(errMsg, true);
+        }
+    }
+
+    window.endParty = endParty;
+    window.setPartyStatus = setPartyStatus;
+    window.deleteParty = deleteParty;
+    window.transferHost = transferHost;
+    window.kickUser = kickUser;
+    window.selectDbTable = selectDbTable;
+    window.deleteDbRow = deleteDbRow;
+    window.searchSelectedTable = searchSelectedTable;
+    window.clearTableSearch = clearTableSearch;
+    window.goDbPage = goDbPage;
+    window.applyDbSort = applyDbSort;
+    window.setPlaybackMode = setPlaybackMode;
+    window.loadHistoryChart = loadHistoryChart;
+
+    el.loginBtn.addEventListener('click', login);
+    el.refreshBtn.addEventListener('click', refreshData);
+    el.refreshDbBtn.addEventListener('click', refreshDbTables);
+    el.clearSelectedTableBtn.addEventListener('click', clearSelectedTable);
+    el.dbSearchBtn.addEventListener('click', searchSelectedTable);
+    el.dbClearSearchBtn.addEventListener('click', clearTableSearch);
+    el.dbApplySortBtn.addEventListener('click', applyDbSort);
+    el.dbPrevBtn.addEventListener('click', () => goDbPage('prev'));
+    el.dbNextBtn.addEventListener('click', () => goDbPage('next'));
+    el.endAllBtn.addEventListener('click', endAllParties);
+    el.resetAllBtn.addEventListener('click', resetAllData);
+    el.logoutBtn.addEventListener('click', logout);
+    el.keyInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') login();
+    });
+    el.dbSearchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') searchSelectedTable();
+    });
+    el.dbSortBy.addEventListener('change', applyDbSort);
+    el.dbSortDir.addEventListener('change', applyDbSort);
+
+    if (state.token) {
+        el.keyInput.value = state.token;
+        login();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopPolling();
+        } else if (state.token) {
+            startPolling();
+        }
+    });
+    window.addEventListener('beforeunload', stopPolling);
+    </script>
+</body>
+</html>

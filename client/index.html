@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05070a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Bajao Bhai — Join the Party</title>
+    <link rel="icon" href="data/bajaobhaicreators.jpeg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bricolage+Grotesque:wght@500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="landing-body">
+    <main class="landing-shell container py-4 py-md-5">
+            <section class="landing-hero text-center text-md-start">
+                <img src="data/bajaobhaicreators.jpeg" alt="Bajao Bhai logo" class="project-logo project-logo-lg mb-3 mx-auto mx-md-0">
+                <p class="hero-chip mb-2">Fast, social music queue</p>
+                <h1 class="hero-title">Join in seconds. Host with confidence.</h1>
+                <p class="hero-subtitle">Pick one path below. Join an existing party with a 6-character code, or create a new room and share your code instantly.</p>
+                <div class="feature-pills mb-0">
+                    <span class="feature-pill">Code-based entry</span>
+                    <span class="feature-pill">Real-time votes</span>
+                    <span class="feature-pill">Host playback sync</span>
+                </div>
+                <ol class="quick-steps mt-3 mb-0 text-start d-inline-block">
+                    <li>Enter your display name.</li>
+                    <li>Join with code or create a party.</li>
+                    <li>Share, vote, and play together.</li>
+                </ol>
+            </section>
+
+            <section class="glass-panel landing-card p-4 p-md-4">
+                <div class="text-center mb-3 landing-card-header">
+                    <img src="data/bajaobhaicreators.jpeg" alt="Bajao Bhai logo" class="project-logo mb-3 mx-auto">
+                    <h2 class="brand-title-landing mb-1">BAJAO BHAI</h2>
+                    <p class="brand-kicker mb-0">Choose one mode to continue</p>
+                </div>
+
+                <div class="d-flex tab-shell p-1 mb-3 flex-row">
+                    <button class="btn flex-grow-1 text-white fw-medium tab-btn active" id="btn-tab-join" aria-controls="form-join" aria-selected="true">Join Party</button>
+                    <button class="btn flex-grow-1 text-muted fw-medium tab-btn" id="btn-tab-create" aria-controls="form-create" aria-selected="false">Create Party</button>
+                </div>
+
+                <div id="form-join">
+                    <p class="mode-subtitle">Have a party code? Enter it below to join instantly.</p>
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-muted fs-8 tracking-widest text-uppercase ms-1">Your Name</label>
+                        <input type="text" class="form-control custom-input" placeholder="e.g. Alex" id="join-name">
+                        <div class="input-hint">This is how others will see you in the room.</div>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-muted fs-8 tracking-widest text-uppercase ms-1">Party Code</label>
+                        <input type="text" class="form-control custom-input font-monospace text-center fs-4 tracking-widest text-uppercase" placeholder="ABC123" maxlength="6" id="join-code">
+                        <div class="input-hint">Use the 6-character code shared by your host.</div>
+                    </div>
+                    <button type="button" id="btn-join" class="btn btn-glow w-100 py-2 fw-bold text-dark">Join Now</button>
+                    <div class="inline-info mt-2 mb-1">No code yet?</div>
+                    <button type="button" id="btn-no-code" class="btn btn-link text-decoration-none w-100 text-muted no-code-link">Switch to Create Party</button>
+                </div>
+
+                <div id="form-create" class="d-none">
+                    <p class="mode-subtitle">Start a room and share the generated code with your friends.</p>
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-muted fs-8 tracking-widest text-uppercase ms-1">Host Name</label>
+                        <input type="text" class="form-control custom-input" placeholder="e.g. Alex" id="create-name" autocomplete="username">
+                        <div class="input-hint">You will get host controls automatically.</div>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-muted fs-8 tracking-widest text-uppercase ms-1">Party Name <span class="text-secondary fw-normal">(optional)</span></label>
+                        <input type="text" class="form-control custom-input" placeholder="Hostel Night" id="create-party-name" maxlength="60" autocomplete="off">
+                    </div>
+                    <div class="form-check toggle-public-wrap mb-3">
+                        <input class="form-check-input" type="checkbox" value="1" id="create-public-party">
+                        <label class="form-check-label" for="create-public-party">
+                            Make party discoverable (public listing)
+                        </label>
+                    </div>
+                    <button type="button" id="btn-create" class="btn btn-glow w-100 py-2 fw-bold text-dark create-btn">Create and Continue</button>
+                    <div class="inline-info mt-2 mb-1">Already have a code?</div>
+                    <button type="button" id="btn-back-to-join" class="btn btn-link text-decoration-none w-100 text-muted no-code-link">Switch to Join Party</button>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <a href="admin.html" class="text-muted fs-8">Admin</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const MAX_USERNAME_LEN = 20;
+        const PARTY_CODE_LEN = 6;
+        let toastTimer = null;
+
+        function normalizeName(value) {
+            return String(value || '').trim().slice(0, MAX_USERNAME_LEN);
+        }
+
+        function normalizePartyCode(value) {
+            return String(value || '')
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .slice(0, PARTY_CODE_LEN);
+        }
+
+        function setButtonBusy(button, busy, loadingText) {
+            if (!button) return;
+
+            if (busy) {
+                button.dataset.originalText = button.innerText;
+                button.disabled = true;
+                button.innerText = loadingText;
+                return;
+            }
+
+            button.disabled = false;
+            button.innerText = button.dataset.originalText || button.innerText;
+            delete button.dataset.originalText;
+        }
+
+        function switchTab(tab) {
+            const joinBtn = document.getElementById('btn-tab-join');
+            const createBtn = document.getElementById('btn-tab-create');
+            const formJoin = document.getElementById('form-join');
+            const formCreate = document.getElementById('form-create');
+
+            const isJoin = tab === 'join';
+            joinBtn.classList.toggle('active', isJoin);
+            joinBtn.classList.toggle('text-white', isJoin);
+            joinBtn.classList.toggle('text-muted', !isJoin);
+            createBtn.classList.toggle('active', !isJoin);
+            createBtn.classList.toggle('text-white', !isJoin);
+            createBtn.classList.toggle('text-muted', isJoin);
+            joinBtn.setAttribute('aria-selected', String(isJoin));
+            createBtn.setAttribute('aria-selected', String(!isJoin));
+            formJoin.classList.toggle('d-none', !isJoin);
+            formCreate.classList.toggle('d-none', isJoin);
+
+            const focusTarget = isJoin ? document.getElementById('join-name') : document.getElementById('create-name');
+            if (focusTarget) {
+                focusTarget.focus();
+            }
+        }
+
+        async function doJoin() {
+    const btn = document.getElementById('btn-join');
+    if (btn?.disabled) return;
+
+    const username = normalizeName(document.getElementById('join-name').value);
+    const partyCode = normalizePartyCode(document.getElementById('join-code').value);
+
+    if (!username) {
+        showToast("Enter your name", "error");
+        return;
+    }
+
+    if (!partyCode) {
+        moveToCreateWithName(username);
+        showToast("No code? Create your own party", "info");
+        return;
+    }
+
+    if (partyCode.length !== PARTY_CODE_LEN) {
+        showToast("Party code must be 6 characters", "error");
+        return;
+    }
+
+    setButtonBusy(btn, true, "⏳ Joining...");
+
+    try {
+        const r = await fetch('/api/v1/party/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, partyCode })
+        });
+
+        let data = {};
+        try {
+            data = await r.json();
+        } catch {
+            data = {};
+        }
+
+        if (r.ok) {
+            showToast("Welcome to the party! 🎉", "success");
+            data.partyCode = partyCode;
+            localStorage.setItem('bb_user', JSON.stringify(data));
+            setTimeout(() => {
+                window.location.href = 'party.html?code=' + partyCode;
+            }, 500);
+        } else {
+            showToast(data.error || `Failed to join (${r.status})`, "error");
+        }
+    } catch (e) {
+        showToast("Network error — check your connection", "error");
+    } finally {
+        setButtonBusy(btn, false);
+    }
+}
+
+        function moveToCreateWithName(username) {
+    switchTab('create');
+    const createName = document.getElementById('create-name');
+    if (createName && username && !createName.value.trim()) {
+        createName.value = username;
+    }
+    if (createName) {
+        createName.focus();
+    }
+}
+
+        function moveToJoinWithName(username) {
+            switchTab('join');
+            const joinName = document.getElementById('join-name');
+            if (joinName && username && !joinName.value.trim()) {
+                joinName.value = username;
+            }
+            if (joinName) {
+                joinName.focus();
+            }
+        }
+
+        async function doCreate() {
+    const btn = document.getElementById('btn-create');
+    if (btn?.disabled) return;
+
+    const username = normalizeName(document.getElementById('create-name').value);
+    const partyNameEl = document.getElementById('create-party-name');
+    const isPublicEl = document.getElementById('create-public-party');
+    const partyName = partyNameEl ? String(partyNameEl.value || '').trim().slice(0, 60) : '';
+    const isPublic = Boolean(isPublicEl?.checked);
+
+    if (!username) {
+        showToast("Enter your name", "error");
+        return;
+    }
+
+    setButtonBusy(btn, true, "⏳ Creating...");
+
+    try {
+        const r = await fetch('/api/v1/party/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, partyName: partyName || undefined, isPublic })
+        });
+
+        let data = {};
+        try {
+            data = await r.json();
+        } catch {
+            data = {};
+        }
+
+        if (r.ok) {
+            showToast("Party created! 🎉 You are the host", "success");
+            data.role = 'host';
+            localStorage.setItem('bb_user', JSON.stringify(data));
+            setTimeout(() => {
+                window.location.href = 'party.html?code=' + data.partyCode;
+            }, 500);
+        } else {
+            showToast(data.error || `Failed to create (${r.status})`, "error");
+        }
+    } catch (e) {
+        showToast("Network error — check your connection", "error");
+    } finally {
+        setButtonBusy(btn, false);
+    }
+}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const joinNameInput = document.getElementById('join-name');
+            const joinCodeInput = document.getElementById('join-code');
+            const createNameInput = document.getElementById('create-name');
+            const createPartyNameInput = document.getElementById('create-party-name');
+
+            document.getElementById('btn-join').addEventListener('click', doJoin);
+            document.getElementById('btn-create').addEventListener('click', doCreate);
+            document.getElementById('btn-tab-join').addEventListener('click', () => switchTab('join'));
+            document.getElementById('btn-tab-create').addEventListener('click', () => switchTab('create'));
+            document.getElementById('btn-no-code').addEventListener('click', () => {
+                const username = document.getElementById('join-name').value.trim();
+                moveToCreateWithName(username);
+            });
+            document.getElementById('btn-back-to-join').addEventListener('click', () => {
+                const username = document.getElementById('create-name').value.trim();
+                moveToJoinWithName(username);
+            });
+
+            joinCodeInput?.addEventListener('input', () => {
+                const normalized = normalizePartyCode(joinCodeInput.value);
+                if (joinCodeInput.value !== normalized) {
+                    joinCodeInput.value = normalized;
+                }
+            });
+
+            const normalizeNameInput = (input) => {
+                const normalized = normalizeName(input.value);
+                if (input.value !== normalized) {
+                    input.value = normalized;
+                }
+            };
+
+            joinNameInput?.addEventListener('input', () => normalizeNameInput(joinNameInput));
+            createNameInput?.addEventListener('input', () => normalizeNameInput(createNameInput));
+            createPartyNameInput?.addEventListener('input', () => {
+                createPartyNameInput.value = String(createPartyNameInput.value || '').slice(0, 60);
+            });
+        });
+        function showToast(message, type = "success") {
+    let toast = document.getElementById("toast-msg");
+
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "toast-msg";
+        toast.style.position = "fixed";
+        toast.style.bottom = "20px";
+        toast.style.left = "50%";
+        toast.style.transform = "translateX(-50%)";
+        toast.style.color = "#fff";
+        toast.style.padding = "12px 20px";
+        toast.style.borderRadius = "8px";
+        toast.style.zIndex = "9999";
+        toast.style.fontWeight = "500";
+        toast.style.fontSize = "0.95rem";
+        toast.style.backdropFilter = "blur(10px)";
+        toast.style.border = "1px solid rgba(255,255,255,0.1)";
+        toast.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+        document.body.appendChild(toast);
+    }
+
+    toast.innerText = message;
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    
+    if (type === "error") {
+        toast.style.background = "rgba(255, 58, 110, 0.15)";
+        toast.style.borderColor = "rgba(255, 58, 110, 0.3)";
+        toast.style.color = "#ff3a6e";
+    } else if (type === "success") {
+        toast.style.background = "rgba(0, 245, 160, 0.15)";
+        toast.style.borderColor = "rgba(0, 245, 160, 0.3)";
+        toast.style.color = "#00f5a0";
+    } else {
+        toast.style.background = "rgba(100, 150, 200, 0.15)";
+        toast.style.borderColor = "rgba(100, 150, 200, 0.3)";
+        toast.style.color = "#6496c8";
+    }
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+
+    toastTimer = setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(-50%) translateY(10px)";
+        toastTimer = null;
+    }, 2300);
+}
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.repeat) {
+        const isJoin = !document.getElementById('form-join').classList.contains('d-none');
+        const target = e.target;
+        if (target instanceof HTMLElement && target.tagName === 'BUTTON') return;
+
+        if (isJoin) {
+            if (!document.getElementById('btn-join').disabled) doJoin();
+        } else if (!document.getElementById('btn-create').disabled) {
+            doCreate();
+        }
+    }
+});
+    </script>
+    
+</body>
+</html>
