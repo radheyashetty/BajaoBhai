@@ -34,8 +34,8 @@ data/        Runtime SQLite files (ignored in Git)
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/<your-username>/bajao-bhai.git
-cd bajao-bhai
+git clone https://github.com/radheyashetty/BajaoBhai.git
+cd BajaoBhai
 npm install
 ```
 

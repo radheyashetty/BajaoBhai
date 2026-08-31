@@ -24,12 +24,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/bajao-bhai.git"
+    "url": "https://github.com/radheyashetty/BajaoBhai.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/bajao-bhai/issues"
+    "url": "https://github.com/radheyashetty/BajaoBhai/issues"
   },
-  "homepage": "https://github.com/yourusername/bajao-bhai#readme",
+  "homepage": "https://github.com/radheyashetty/BajaoBhai#readme",
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"

@@ -11,8 +11,8 @@ Please be respectful and constructive in all issues, pull requests, and discussi
 1. **Fork the Repository**: Create your own fork of the project on GitHub.
 2. **Clone & Setup**:
    ```bash
-   git clone https://github.com/your-username/bajao-bhai.git
-   cd bajao-bhai
+   git clone https://github.com/radheyashetty/BajaoBhai.git
+   cd BajaoBhai
    npm install
    cp .env.example .env
    ```
