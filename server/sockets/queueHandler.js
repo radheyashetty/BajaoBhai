@@ -67,6 +67,7 @@ function scheduleSafetyTimer(io, partyCode, song, offsetSeconds = 0) {
       Logger.error('queue', `safetyTimer execution error party=${partyCode}: ${err.message}`, err);
     }
   }, ms);
+  t.unref();
 
   safetyTimers.set(partyCode, t);
 }
@@ -867,3 +868,4 @@ module.exports.emitNowPlaying = emitNowPlaying;
 module.exports.emitCurrentNowPlayingToSocket = emitCurrentNowPlayingToSocket;
 module.exports.startNextSong = startNextSong;
 module.exports.ensurePlaybackStarted = ensurePlaybackStarted;
+module.exports.clearSafetyTimer = clearSafetyTimer;

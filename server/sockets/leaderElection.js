@@ -83,6 +83,7 @@ function scheduleNoUsersEndTimer(io, partyCode) {
       noUsersEndTimers.delete(partyCode);
     }
   }, NO_USERS_END_GRACE_MS);
+  timerId.unref();
 
   noUsersEndTimers.set(partyCode, timerId);
   Logger.info(
@@ -180,6 +181,7 @@ module.exports = (io, socket) => {
             await releaseElectionLock(partyCode);
           }
         }, HOST_RECONNECT_GRACE_MS);
+        timerId.unref();
 
         const lockOwner = `${socket.id}:${userId}`;
         const hasLock = await tryAcquireElectionLock(partyCode, lockOwner);

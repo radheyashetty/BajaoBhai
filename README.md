@@ -7,7 +7,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8.1-010101?style=flat-square&logo=socketdotio&logoColor=white)](https://socket.io/)
 [![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
-[![Tests](https://img.shields.io/badge/Tests-30%2F30%20Passing-brightgreen?style=flat-square&logo=node.js&logoColor=white)](test/)
+[![Tests](https://img.shields.io/badge/Tests-35%2F35%20Passing-brightgreen?style=flat-square&logo=node.js&logoColor=white)](test/)
 [![Responsive](https://img.shields.io/badge/Mobile-iOS%20%7C%20Android%20%7C%20Windows-blueviolet?style=flat-square)](client/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
@@ -175,6 +175,7 @@ npm test
 - `test/party.test.js`: Verifies 6-character party code generation, collision resistance, and persistence.
 - `test/queue.test.js`: Tests net score ranking, vote toggle transitions, and queue order.
 - `test/admin.test.js`: Tests health tracking, alert clearing, and telemetry.
+- `test/multiuser.test.js`: Real-time multi-client integration tests for concurrent users, dynamic voting reordering, synchronized playback broadcast, chat, and host handover.
 
 ---
 
@@ -217,7 +218,7 @@ BajaoBhai/
 ├── scripts/                    # Maintenance & automation scripts
 │   ├── capture_screenshots.js  # Headless Chrome CDP screenshot capture
 │   └── seed_demo.js            # Demo party populator
-└── test/                       # Automated test suite (30 unit & integration tests)
+└── test/                       # Automated test suite (35 unit & integration tests across 7 test suites)
 ```
 
 ---
