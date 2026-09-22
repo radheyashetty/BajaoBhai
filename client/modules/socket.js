@@ -111,6 +111,11 @@ export function initSocket() {
       state.currentSong = payload.song;
       state.currentStartedAt = Number(payload.startedAt) || Date.now();
       state.currentIsPlaying = payload.isPlaying !== false;
+      if (DOM.nowPlayingTitle) DOM.nowPlayingTitle.textContent = payload.song.title || 'No song';
+      if (DOM.nowPlayingThumb && payload.song.thumbnail) {
+        DOM.nowPlayingThumb.src = payload.song.thumbnail;
+        DOM.nowPlayingThumb.alt = payload.song.title || 'Song thumbnail';
+      }
       return;
     }
 

@@ -604,7 +604,17 @@ body {
     }
 }
 
-/* Mobile-first player controls */
+/* Touch and cross-platform browser optimizations (iOS, Android, Windows) */
+button, input, select, textarea, .btn, .tab-btn, .queue-item button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile-first player controls & Safe Area support */
+.player-bar {
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+}
+
 @media (max-width: 991px) {
     .player-bar .btn {
         min-width: 44px;
@@ -613,6 +623,12 @@ body {
     }
     .player-bar .btn i {
         font-size: 1.2rem;
+    }
+    .queue-item .d-flex.gap-1 button {
+        min-width: 38px;
+        min-height: 38px;
+        padding: 4px 8px;
+        font-size: 0.9rem;
     }
 }
 
@@ -755,44 +771,47 @@ body {
         }
     }
 
-/* Mobile Sidebar Overlay */
-.sidebar-overlay {
-    display: none;
+
+.sidebar-backdrop {
     position: fixed;
-    inset: 0;
-    z-index: 1060;
-    background: rgba(0,0,0,0.55);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
 }
-.sidebar-overlay.active {
-    display: block;
+.sidebar-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
 }
-.sidebar-overlay .sidebar-sheet {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-height: 75dvh;
-    overflow-y: auto;
-    background: var(--glass-bg, rgba(12, 14, 22, 0.92));
-    border-top: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px 18px 0 0;
-    padding: 16px;
-    animation: slideUp 0.28s ease-out;
-}
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-}
-.sidebar-overlay .sidebar-close-btn {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    color: #adb5bd;
-    font-size: 1.2rem;
-    cursor: pointer;
-    z-index: 2;
+
+@media (max-width: 991.98px) {
+    #users-sidebar {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 85%;
+        max-width: 380px;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 1050;
+        background: rgba(12, 16, 26, 0.97);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        padding: 1.25rem;
+        overflow-y: auto;
+        transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.6);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #users-sidebar.mobile-open {
+        right: 0 !important;
+        display: block !important;
+    }
 }

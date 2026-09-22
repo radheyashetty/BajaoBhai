@@ -121,7 +121,7 @@ async function start() {
       Logger.warn('startup', 'YOUTUBE_API_KEY is not set — YouTube search will not work');
     }
 
-    const { pool, initSchema } = require('./db');
+    const { query, initSchema } = require('./db');
     const initSocket = require('./sockets');
     const { connectRedis } = require('./utils/redisClient');
 
@@ -133,7 +133,7 @@ async function start() {
     app.set('io', io);
 
     // 3. Database verification and schema
-    await pool.query('SELECT 1');
+    query('SELECT 1');
     await initSchema();
 
     // 4. Cleanup tasks
