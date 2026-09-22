@@ -1,10 +1,12 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const fsSync = require('fs');
 const fs = require('fs').promises;
 const Logger = require('./utils/logger');
 
-// Create SQLite database
+// Create SQLite database directory if missing
 const dbPath = path.join(__dirname, '../data/bajao_bhai.db');
+fsSync.mkdirSync(path.dirname(dbPath), { recursive: true });
 const db = new Database(dbPath, { timeout: 5000 });
 const VERBOSE_DB_LOGS = process.env.BB_VERBOSE_DB_LOGS !== '0';
 
@@ -170,6 +172,44 @@ function rebuildSongsForLegacyColumns(columns) {
   }
 }
 
+function removeLegacySongUniqueConstraint() {
+  const tableDef = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='songs'").get();
+  if (tableDef && tableDef.sql && tableDef.sql.includes('UNIQUE(party_code, video_id, status)')) {
+    Logger.info('db', 'Migrating songs table to remove legacy broad UNIQUE constraint...');
+    db.exec('BEGIN');
+    try {
+      db.exec(`
+        CREATE TABLE songs_new (
+          song_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          party_code TEXT NOT NULL,
+          video_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          channel_name TEXT,
+          thumbnail TEXT,
+          duration_seconds INTEGER DEFAULT 0,
+          added_by INTEGER,
+          status TEXT DEFAULT 'queued' CHECK(status IN ('queued','playing','played','skipped')),
+          added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (party_code) REFERENCES parties(party_code) ON DELETE CASCADE,
+          FOREIGN KEY (added_by) REFERENCES users(user_id) ON DELETE SET NULL
+        )
+      `);
+      db.exec(`
+        INSERT INTO songs_new (song_id, party_code, video_id, title, channel_name, thumbnail, duration_seconds, added_by, status, added_at)
+        SELECT song_id, party_code, video_id, title, channel_name, thumbnail, duration_seconds, added_by, status, added_at
+        FROM songs
+      `);
+      db.exec('DROP TABLE songs');
+      db.exec('ALTER TABLE songs_new RENAME TO songs');
+      db.exec('COMMIT');
+      Logger.info('db', 'Successfully migrated songs table to remove legacy broad UNIQUE constraint');
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
+  }
+}
+
 function applyMigrations() {
   runSafeAlter('ALTER TABLE parties ADD COLUMN is_public INTEGER DEFAULT 0');
   runSafeAlter('ALTER TABLE parties ADD COLUMN party_name TEXT');
@@ -180,6 +220,7 @@ function applyMigrations() {
 
   const songColumns = getTableColumns('songs');
   rebuildSongsForLegacyColumns(songColumns);
+  removeLegacySongUniqueConstraint();
 
   runSafeAlter('ALTER TABLE songs ADD COLUMN channel_name TEXT');
   runSafeAlter('ALTER TABLE songs ADD COLUMN duration_seconds INTEGER DEFAULT 0');

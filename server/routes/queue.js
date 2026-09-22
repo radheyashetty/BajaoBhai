@@ -5,6 +5,7 @@ const { getCachedQueue, setCachedQueue, invalidateQueue } = require('../utils/re
 const { verifyToken } = require('../utils/tokenUtils');
 const queueSocket = require('../sockets/queueHandler');
 const Logger = require('../utils/logger');
+const { isValidVideoId } = require('../utils/validators');
 
 const MAX_QUEUED_PER_USER = 3;
 
@@ -69,7 +70,12 @@ router.post('/add', verifyToken, async (req, res) => {
     const normalizedVideoId = String(videoId || '').trim();
     const normalizedAddedBy = Number.parseInt(addedBy, 10);
 
-    if (!normalizedPartyCode || !normalizedVideoId || !Number.isInteger(normalizedAddedBy)) {
+    if (
+      !normalizedPartyCode ||
+      !normalizedVideoId ||
+      !Number.isInteger(normalizedAddedBy) ||
+      !isValidVideoId(normalizedVideoId)
+    ) {
       return res.status(400).json({ error: 'Missing or invalid required parameters' });
     }
 

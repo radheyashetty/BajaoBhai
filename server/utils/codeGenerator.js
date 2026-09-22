@@ -24,5 +24,7 @@ async function generateUniquePartyCode() {
 }
 
 module.exports = {
+  randomCode,
+  generatePartyCode: randomCode,
   generateUniquePartyCode,
 };

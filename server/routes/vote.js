@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { query } = require('../db');
+const { query, runTransactionSync } = require('../db');
 const { verifyToken } = require('../utils/tokenUtils');
 const { invalidateQueue } = require('../utils/redisClient');
 const Logger = require('../utils/logger');
@@ -40,45 +40,42 @@ router.post('/', verifyToken, async (req, res) => {
 
     // Toggle logic aligned with socket voteSong handler:
     // same vote => remove, different vote => switch, no vote => insert.
-    const exists = await query('SELECT vote_type FROM votes WHERE user_id = ? AND song_id = ?', [
-      userId,
-      normalizedSongId,
-    ]);
-
-    let action;
-    if (exists.length > 0) {
-      const current = exists[0].vote_type;
-      if (current === voteType) {
-        await query('DELETE FROM votes WHERE user_id = ? AND song_id = ?', [
-          userId,
-          normalizedSongId,
-        ]);
-        action = 'removed';
-        Logger.info('route:vote', `removed userId=${userId} songId=${normalizedSongId}`);
-      } else {
-        await query('UPDATE votes SET vote_type = ? WHERE user_id = ? AND song_id = ?', [
-          voteType,
-          userId,
-          normalizedSongId,
-        ]);
-        action = 'updated';
-        Logger.info(
-          'route:vote',
-          `updated userId=${userId} songId=${normalizedSongId} voteType=${voteType}`
-        );
-      }
-    } else {
-      await query('INSERT INTO votes (user_id, song_id, vote_type) VALUES (?, ?, ?)', [
+    const action = runTransactionSync(() => {
+      const exists = query('SELECT vote_type FROM votes WHERE user_id = ? AND song_id = ? LIMIT 1', [
         userId,
         normalizedSongId,
-        voteType,
       ]);
-      action = 'created';
-      Logger.info(
-        'route:vote',
-        `created userId=${userId} songId=${normalizedSongId} voteType=${voteType}`
-      );
-    }
+
+      if (exists.length > 0) {
+        const current = exists[0].vote_type;
+        if (current === voteType) {
+          query('DELETE FROM votes WHERE user_id = ? AND song_id = ?', [
+            userId,
+            normalizedSongId,
+          ]);
+          return 'removed';
+        } else {
+          query('UPDATE votes SET vote_type = ? WHERE user_id = ? AND song_id = ?', [
+            voteType,
+            userId,
+            normalizedSongId,
+          ]);
+          return 'updated';
+        }
+      } else {
+        query('INSERT INTO votes (user_id, song_id, vote_type) VALUES (?, ?, ?)', [
+          userId,
+          normalizedSongId,
+          voteType,
+        ]);
+        return 'created';
+      }
+    });
+
+    Logger.info(
+      'route:vote',
+      `${action} userId=${userId} songId=${normalizedSongId} voteType=${voteType}`
+    );
 
     // Invalidate cache and broadcast queue update through Socket.IO
     await invalidateQueue(partyCode);

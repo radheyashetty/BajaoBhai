@@ -1,11 +1,14 @@
 const crypto = require('crypto');
 const { query } = require('../db');
 
-const SECRET = process.env.TOKEN_SECRET;
 const TOKEN_TTL_SECONDS = 7 * 24 * 60 * 60;
 
-if (!SECRET) {
-  throw new Error('TOKEN_SECRET is required');
+function getSecret() {
+  const secret = process.env.TOKEN_SECRET;
+  if (!secret) {
+    throw new Error('TOKEN_SECRET is required');
+  }
+  return secret;
 }
 
 function sign(payload) {
@@ -13,6 +16,7 @@ function sign(payload) {
     throw new Error('Token payload must be an object');
   }
 
+  const secret = getSecret();
   const nowSeconds = Math.floor(Date.now() / 1000);
   const bodyPayload = {
     ...payload,
@@ -22,7 +26,7 @@ function sign(payload) {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const body = Buffer.from(JSON.stringify(bodyPayload)).toString('base64url');
   const signature = crypto
-    .createHmac('sha256', SECRET)
+    .createHmac('sha256', secret)
     .update(`${header}.${body}`)
     .digest('base64url');
   return `${header}.${body}.${signature}`;
@@ -50,13 +54,14 @@ function verify(token) {
   const [header, body, sig] = parts;
 
   try {
+    const secret = getSecret();
     const parsedHeader = parseJsonBase64url(header);
     if (parsedHeader?.alg !== 'HS256' || parsedHeader?.typ !== 'JWT') {
       return null;
     }
 
     const expected = crypto
-      .createHmac('sha256', SECRET)
+      .createHmac('sha256', secret)
       .update(`${header}.${body}`)
       .digest('base64url');
 

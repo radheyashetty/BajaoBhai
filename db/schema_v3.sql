@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS songs (
     added_by INTEGER,
     status TEXT DEFAULT 'queued' CHECK(status IN ('queued','playing','played','skipped')),
     added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(party_code, video_id, status),
     FOREIGN KEY (party_code) REFERENCES parties(party_code) ON DELETE CASCADE,
     FOREIGN KEY (added_by) REFERENCES users(user_id) ON DELETE SET NULL
 );
@@ -51,6 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_songs_party_code ON songs(party_code);
 CREATE INDEX IF NOT EXISTS idx_songs_status ON songs(status);
 CREATE INDEX IF NOT EXISTS idx_songs_added_at ON songs(added_at);
 CREATE INDEX IF NOT EXISTS idx_songs_party_status ON songs(party_code, status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_songs_unique_queued ON songs(party_code, video_id) WHERE status = 'queued';
 
 CREATE TABLE IF NOT EXISTS votes (
     vote_id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const { isRedisReady, redis } = require('../utils/redisClient');
 const Logger = require('../utils/logger');
 const { recordStreamFailure, recordStreamSuccess } = require('../utils/systemHealth');
+const { isValidVideoId } = require('../utils/validators');
 
 const STREAM_CACHE_TTL = 7200; // 2 hours (YouTube direct URLs typically expire after ~6h)
 
@@ -34,6 +35,10 @@ async function setCachedStreamInfo(videoId, info) {
 router.get('/:videoId', async (req, res) => {
   const { videoId } = req.params;
   const { start } = req.query;
+
+  if (!isValidVideoId(videoId)) {
+    return res.status(400).json({ error: 'Invalid videoId format' });
+  }
 
   try {
     const cached = await getCachedStreamInfo(videoId);
@@ -229,6 +234,12 @@ router.get('/:videoId', async (req, res) => {
     upstream.body.on('error', (err) => {
       Logger.error('stream', `Upstream media stream error: ${err.message}`, err);
       if (!res.headersSent) res.status(500).end();
+    });
+
+    res.on('close', () => {
+      if (upstream?.body && typeof upstream.body.destroy === 'function') {
+        upstream.body.destroy();
+      }
     });
 
     upstream.body.pipe(res);

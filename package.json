@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "nodemon server/index.js",
-    "lint": "eslint server/**/*.js client/*.js --ext .js",
-    "format": "prettier --write server/**/*.js client/*.js",
-    "test": "npm run lint"
+    "lint": "eslint server/**/*.js client/**/*.js --ext .js",
+    "format": "prettier --write server/**/*.js client/**/*.js",
+    "test": "node --test test/**/*.test.js && npm run lint"
   },
   "keywords": [
     "music",

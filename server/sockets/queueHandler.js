@@ -10,6 +10,7 @@ const {
 const { allowEvent } = require('../utils/rateLimiter');
 const { emitPartyUserListIfChanged } = require('./userListBroadcast');
 const Logger = require('../utils/logger');
+const { isValidVideoId } = require('../utils/validators');
 
 const QUEUE_WITH_SCORES_SQL = `
   SELECT s.*,
@@ -550,8 +551,8 @@ module.exports = (io, socket) => {
         return socket.emit('actionError', { message: 'Party is not active' });
       }
 
-      if (!videoId) {
-        return socket.emit('actionError', { message: 'Invalid video' });
+      if (!videoId || !isValidVideoId(videoId)) {
+        return socket.emit('actionError', { message: 'Invalid video ID format' });
       }
 
       const normalizedChannelName =
