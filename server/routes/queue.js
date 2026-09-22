@@ -5,7 +5,7 @@ const { getCachedQueue, setCachedQueue, invalidateQueue } = require('../utils/re
 const { verifyToken } = require('../utils/tokenUtils');
 const queueSocket = require('../sockets/queueHandler');
 const Logger = require('../utils/logger');
-const { isValidVideoId } = require('../utils/validators');
+const { isValidVideoId, isValidPartyCode } = require('../utils/validators');
 
 const MAX_QUEUED_PER_USER = 3;
 
@@ -24,6 +24,9 @@ function normalizePartyCode(code) {
 router.get('/:code', async (req, res) => {
   try {
     const code = normalizePartyCode(req.params.code);
+    if (!isValidPartyCode(code)) {
+      return res.status(400).json({ error: 'Invalid party code' });
+    }
     const cached = await getCachedQueue(code);
     if (cached) {
       Logger.info('route:queue', `cache hit party=${code} songs=${cached.length}`);
@@ -74,9 +77,18 @@ router.post('/add', verifyToken, async (req, res) => {
       !normalizedPartyCode ||
       !normalizedVideoId ||
       !Number.isInteger(normalizedAddedBy) ||
+      !isValidPartyCode(normalizedPartyCode) ||
       !isValidVideoId(normalizedVideoId)
     ) {
       return res.status(400).json({ error: 'Missing or invalid required parameters' });
+    }
+
+    if (
+      !req.user ||
+      req.user.partyCode !== normalizedPartyCode ||
+      req.user.userId !== normalizedAddedBy
+    ) {
+      return res.status(403).json({ error: 'Forbidden: Token claims do not match request parameters' });
     }
 
     const normalizedDurationRaw = duration_seconds ?? duration;
@@ -176,6 +188,9 @@ router.post('/add', verifyToken, async (req, res) => {
 router.get('/export/:code', async (req, res) => {
   try {
     const code = normalizePartyCode(req.params.code);
+    if (!isValidPartyCode(code)) {
+      return res.status(400).json({ error: 'Invalid party code' });
+    }
     const parsedLimit = Number.parseInt(req.query.limit, 10);
     const limit = Number.isNaN(parsedLimit) ? 500 : Math.min(Math.max(parsedLimit, 1), 2000);
     const songs = await query(

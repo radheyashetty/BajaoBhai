@@ -121,7 +121,8 @@ router.get('/:videoId', async (req, res) => {
       });
     }
 
-    const seekSeconds = Math.max(0, Number(start) || 0);
+    const rawStart = Number(start);
+    const seekSeconds = Number.isFinite(rawStart) && rawStart > 0 ? Math.floor(rawStart) : 0;
 
     // When we need to seek but cached entry is missing filesize/duration, try to enrich it
     if (seekSeconds > 0 && (!filesize || !duration)) {

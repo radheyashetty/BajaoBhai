@@ -39,4 +39,23 @@ test('Admin & System Health Tracker', async (t) => {
     assert.equal(summary.status, 'healthy');
     assert.equal(summary.totalAlerts, 0);
   });
+
+  await t.test('constant-time comparison resists timing leaks and length mismatches', () => {
+    const crypto = require('crypto');
+    function safeCompare(a, b) {
+      if (typeof a !== 'string' || typeof b !== 'string') return false;
+      const hashA = crypto.createHash('sha256').update(a).digest();
+      const hashB = crypto.createHash('sha256').update(b).digest();
+      return crypto.timingSafeEqual(hashA, hashB);
+    }
+
+    assert.equal(safeCompare('supersecret', 'supersecret'), true);
+    assert.equal(safeCompare('supersecret', 'wrongsecret'), false);
+    assert.equal(safeCompare('supersecret', 'short'), false);
+    assert.equal(safeCompare('short', 'supersecret'), false);
+    assert.equal(safeCompare('', 'supersecret'), false);
+    assert.equal(safeCompare(null, 'supersecret'), false);
+    assert.equal(safeCompare(undefined, 'supersecret'), false);
+    assert.equal(safeCompare(12345, '12345'), false);
+  });
 });

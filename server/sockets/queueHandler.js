@@ -90,11 +90,12 @@ async function withPartyLock(partyCode, fn) {
 
 /* ================= HELPERS ================= */
 
-async function validateSongBelongsToParty(songId, partyCode) {
-  const rows = await query('SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? LIMIT 1', [
-    songId,
-    partyCode,
-  ]);
+async function validateSongBelongsToParty(songId, partyCode, status = null) {
+  const sql = status
+    ? 'SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? AND status = ? LIMIT 1'
+    : 'SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? LIMIT 1';
+  const params = status ? [songId, partyCode, status] : [songId, partyCode];
+  const rows = await query(sql, params);
   return rows.length > 0;
 }
 
@@ -566,7 +567,14 @@ module.exports = (io, socket) => {
           .replace(/[<>]/g, '')
           .trim()
           .slice(0, 200) || 'Unknown';
-      const normalizedDuration = duration_seconds ?? duration ?? 0;
+      const safeThumbnail = String(thumbnail || '')
+        .trim()
+        .slice(0, 500);
+      const parsedDuration = Number(duration_seconds ?? duration ?? 0);
+      const safeDuration =
+        Number.isFinite(parsedDuration) && parsedDuration >= 0 && parsedDuration <= 86400
+          ? Math.floor(parsedDuration)
+          : 0;
 
       const result = runTransactionSync(() => {
         const userRow = query('SELECT role FROM users WHERE user_id = ? LIMIT 1', [userId]);
@@ -596,9 +604,9 @@ module.exports = (io, socket) => {
             partyCode,
             videoId,
             safeTitle,
-            thumbnail,
+            safeThumbnail,
             normalizedChannelName,
-            normalizedDuration,
+            safeDuration,
             userId,
           ]
         );
@@ -632,20 +640,21 @@ module.exports = (io, socket) => {
     try {
       const partyCode = socket.user?.partyCode;
       const userId = socket.user?.userId;
-      if (!partyCode || !songId || !['up', 'down'].includes(voteType)) return;
+      const normalizedSongId = Number.parseInt(songId, 10);
+      if (!partyCode || !Number.isInteger(normalizedSongId) || !['up', 'down'].includes(voteType)) return;
       if (await checkRateLimit(socket, 'vote-song', 20, 10)) return;
       if (!(await ensurePartyActive(partyCode))) return;
 
-      if (!(await validateSongBelongsToParty(songId, partyCode))) return;
+      if (!(await validateSongBelongsToParty(normalizedSongId, partyCode, 'queued'))) return;
 
       runTransactionSync(() => {
         const existing = query(
           'SELECT vote_type FROM votes WHERE user_id = ? AND song_id = ? LIMIT 1',
-          [userId, songId]
+          [userId, normalizedSongId]
         );
 
         if (existing.length > 0 && existing[0].vote_type === voteType) {
-          query('DELETE FROM votes WHERE user_id = ? AND song_id = ?', [userId, songId]);
+          query('DELETE FROM votes WHERE user_id = ? AND song_id = ?', [userId, normalizedSongId]);
         } else {
           query(
             `
@@ -653,7 +662,7 @@ module.exports = (io, socket) => {
             VALUES (?, ?, ?)
             ON CONFLICT(user_id, song_id) DO UPDATE SET vote_type=excluded.vote_type
           `,
-            [userId, songId, voteType]
+            [userId, normalizedSongId, voteType]
           );
         }
       });
@@ -661,7 +670,7 @@ module.exports = (io, socket) => {
       await invalidateQueue(partyCode);
       await emitQueueUpdate(io, partyCode);
 
-      qLog(`voteSong party=${partyCode} userId=${userId} songId=${songId} voteType=${voteType}`);
+      qLog(`voteSong party=${partyCode} userId=${userId} songId=${normalizedSongId} voteType=${voteType}`);
     } catch (err) {
       Logger.error('queue', `voteSong error: ${err.message}`, err);
     }
@@ -733,7 +742,7 @@ module.exports = (io, socket) => {
       if (!partyCode || !Number.isInteger(normalizedSongId)) return;
       if (await checkRateLimit(socket, 'skip-vote', 12, 10)) return;
       if (!(await ensurePartyActive(partyCode))) return;
-      if (!(await validateSongBelongsToParty(normalizedSongId, partyCode))) return;
+      if (!(await validateSongBelongsToParty(normalizedSongId, partyCode, 'playing'))) return;
 
       const voteData = await withPartyLock(partyCode, async () => {
         return runTransactionSync(() => {
@@ -784,10 +793,11 @@ module.exports = (io, socket) => {
   socket.on('reactToSong', async ({ songId, emoji }) => {
     try {
       const partyCode = socket.user?.partyCode;
-      if (!partyCode || !songId) return;
+      const normalizedSongId = Number.parseInt(songId, 10);
+      if (!partyCode || !Number.isInteger(normalizedSongId)) return;
       if (await checkRateLimit(socket, 'react-song', 25, 10)) return;
       if (!(await ensurePartyActive(partyCode))) return;
-      if (!(await validateSongBelongsToParty(songId, partyCode))) return;
+      if (!(await validateSongBelongsToParty(normalizedSongId, partyCode))) return;
 
       if (!['fire', 'clap', 'dance'].includes(emoji)) return;
 
@@ -801,7 +811,7 @@ module.exports = (io, socket) => {
       // Persist reaction to database
       await query('INSERT INTO reactions (user_id, song_id, emoji) VALUES (?, ?, ?)', [
         socket.user.userId,
-        songId,
+        normalizedSongId,
         emojiMap[emoji] || emoji,
       ]);
 
@@ -812,7 +822,7 @@ module.exports = (io, socket) => {
         at: Date.now(),
       });
       qLog(
-        `reaction party=${partyCode} userId=${socket.user.userId} songId=${songId} emoji=${emoji}`
+        `reaction party=${partyCode} userId=${socket.user.userId} songId=${normalizedSongId} emoji=${emoji}`
       );
     } catch (err) {
       Logger.error('queue', `reactToSong error: ${err.message}`, err);

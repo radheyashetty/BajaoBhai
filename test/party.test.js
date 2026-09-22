@@ -28,4 +28,15 @@ test('Party Operations & Code Generation', async (t) => {
     const code2 = await generateUniquePartyCode();
     assert.notEqual(code1, code2);
   });
+
+  await t.test('sanitizes party name and username correctly', () => {
+    const { sanitizeString } = require('../server/utils/validators');
+    const dirtyPartyName = '  <b>Rock Party</b> <script>alert(1)</script> ';
+    const cleanPartyName = sanitizeString(dirtyPartyName, 60);
+    assert.equal(cleanPartyName, 'Rock Party');
+
+    const dirtyUsername = '   <img src="x" onerror="alert(1)">DJ Cool   ';
+    const cleanUsername = sanitizeString(dirtyUsername, 20);
+    assert.equal(cleanUsername, 'DJ Cool');
+  });
 });

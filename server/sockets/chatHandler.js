@@ -101,10 +101,13 @@ module.exports = function chatHandler(io, socket) {
     }
   });
 
-  socket.on('typingIndicator', () => {
+  socket.on('typingIndicator', async () => {
     try {
       const { partyCode, username } = socket.user || {};
       if (!partyCode || !username) return;
+
+      const rateLimitError = await enforceEventLimit(socket, 'typing-indicator', 4, 3);
+      if (rateLimitError) return;
 
       // Broadcast to everyone else in the room (not the sender)
       socket.to(partyCode).emit('userTyping', { username });

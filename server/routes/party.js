@@ -3,6 +3,7 @@ const router = express.Router();
 const { query, runTransactionSync } = require('../db');
 const { generateUniquePartyCode } = require('../utils/codeGenerator');
 const { sign } = require('../utils/tokenUtils');
+const { isValidPartyCode, sanitizeString } = require('../utils/validators');
 const Logger = require('../utils/logger');
 
 const avatarColors = [
@@ -47,7 +48,7 @@ function normalizeUsername(username) {
   if (!username || typeof username !== 'string' || !username.trim()) {
     return null;
   }
-  const clean = username.trim().slice(0, USERNAME_MAX_LEN);
+  const clean = sanitizeString(username, USERNAME_MAX_LEN);
   if (!clean) return null;
   return clean;
 }
@@ -74,8 +75,8 @@ router.post('/join', async (req, res) => {
     }
 
     const partyCode = normalizePartyCode(rawCode);
-    if (!partyCode || partyCode.length !== 6) {
-      return res.status(400).json({ error: 'Invalid party code (must be 6 characters)' });
+    if (!isValidPartyCode(partyCode)) {
+      return res.status(400).json({ error: 'Invalid party code (must be 6 alphanumeric characters)' });
     }
 
     const randomColor = pickAvatarColor();
@@ -133,7 +134,7 @@ router.post('/create', async (req, res) => {
         .json({ error: `Username too long (max ${USERNAME_MAX_LEN} characters)` });
     }
 
-    const validPartyName = partyName ? String(partyName).trim().slice(0, 60) : null;
+    const validPartyName = partyName ? sanitizeString(partyName, 60) : null;
     const randomColor = pickAvatarColor();
 
     for (let attempt = 0; attempt < 5; attempt += 1) {

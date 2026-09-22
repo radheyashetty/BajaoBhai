@@ -1,16 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { query, runTransactionSync } = require('../db');
 const { getAliveNodes } = require('../utils/nodeRegistry');
 const { endParty } = require('../utils/partyCleanup');
 const { getGlobalPlaybackMode, setGlobalPlaybackMode } = require('../utils/redisClient');
 const Logger = require('../utils/logger');
 const { getHealthSummary, getAlerts, clearAlerts } = require('../utils/systemHealth');
+const { isValidPartyCode } = require('../utils/validators');
 
 router.use((req, _res, next) => {
   Logger.info('route:admin', `${req.method} ${req.originalUrl}`);
   next();
 });
+
+function safeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const hashA = crypto.createHash('sha256').update(a).digest();
+  const hashB = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
+}
 
 /* ================= ADMIN AUTH ================= */
 function requireAdmin(req, res, next) {
@@ -24,7 +33,7 @@ function requireAdmin(req, res, next) {
   }
 
   const expected = `Bearer ${secret}`;
-  if (!auth || auth !== expected) {
+  if (!auth || !safeCompare(auth, expected)) {
     const receivedLen = auth ? auth.length : 0;
     const expectedLen = expected.length;
     Logger.warn(
@@ -57,7 +66,7 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Admin key is required' });
   }
 
-  if (submittedKey !== secret) {
+  if (!safeCompare(submittedKey, secret)) {
     Logger.warn(
       'admin',
       `login failed ip=${sourceIp} submittedLen=${submittedKey.length} expectedLen=${secret.length}`
@@ -71,7 +80,7 @@ router.post('/login', (req, res) => {
 
 /* ================= HELPERS ================= */
 function validatePartyCode(code) {
-  return /^[A-Z0-9]{6}$/.test(String(code || '').toUpperCase());
+  return isValidPartyCode(code);
 }
 
 function normalizePartyCode(code) {

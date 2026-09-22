@@ -29,13 +29,13 @@ router.post('/', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Invalid songId' });
     }
 
-    // Verify song belongs to user's party
+    // Verify song belongs to user's party and is queued
     const songRows = await query(
-      'SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? LIMIT 1',
-      [normalizedSongId, partyCode]
+      'SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? AND status = ? LIMIT 1',
+      [normalizedSongId, partyCode, 'queued']
     );
     if (!songRows.length) {
-      return res.status(404).json({ error: 'Song not found in your party' });
+      return res.status(404).json({ error: 'Song not found or not in queue' });
     }
 
     // Toggle logic aligned with socket voteSong handler:

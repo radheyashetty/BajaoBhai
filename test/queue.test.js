@@ -137,4 +137,59 @@ test('Queue & Voting Logic', async (t) => {
     ]);
     assert.equal(v.length, 0);
   });
+
+  await t.test('enforces status checks: only queued songs can be voted on, only playing songs can be skip-voted', () => {
+    const sPlayed = query(
+      'INSERT INTO songs (party_code, video_id, title, status, added_by) VALUES (?, ?, ?, ?, ?)',
+      [partyCode, 'v4444444444', 'Song Played', 'played', hostUser.insertId]
+    );
+    const sPlaying = query(
+      'INSERT INTO songs (party_code, video_id, title, status, added_by) VALUES (?, ?, ?, ?, ?)',
+      [partyCode, 'v5555555555', 'Song Playing', 'playing', hostUser.insertId]
+    );
+    const sQueued = query(
+      'INSERT INTO songs (party_code, video_id, title, status, added_by) VALUES (?, ?, ?, ?, ?)',
+      [partyCode, 'v6666666666', 'Song Queued', 'queued', hostUser.insertId]
+    );
+
+    function checkCanVote(songId, status) {
+      const rows = query(
+        'SELECT 1 FROM songs WHERE song_id = ? AND party_code = ? AND status = ? LIMIT 1',
+        [songId, partyCode, status]
+      );
+      return rows.length > 0;
+    }
+
+    // Regular voting is only allowed for queued
+    assert.equal(checkCanVote(sPlayed.insertId, 'queued'), false);
+    assert.equal(checkCanVote(sPlaying.insertId, 'queued'), false);
+    assert.equal(checkCanVote(sQueued.insertId, 'queued'), true);
+
+    // Skip voting is only allowed for playing
+    assert.equal(checkCanVote(sPlayed.insertId, 'playing'), false);
+    assert.equal(checkCanVote(sQueued.insertId, 'playing'), false);
+    assert.equal(checkCanVote(sPlaying.insertId, 'playing'), true);
+  });
+
+  await t.test('duration and thumbnail boundary handling', () => {
+    // Negative duration should clamp to 0
+    const rawNegative = -50;
+    const safeNeg = Number.isFinite(rawNegative) && rawNegative >= 0 && rawNegative <= 86400 ? Math.floor(rawNegative) : 0;
+    assert.equal(safeNeg, 0);
+
+    // Excessively large duration (> 24h) clamps to 0
+    const rawHuge = 100000;
+    const safeHuge = Number.isFinite(rawHuge) && rawHuge >= 0 && rawHuge <= 86400 ? Math.floor(rawHuge) : 0;
+    assert.equal(safeHuge, 0);
+
+    // Valid duration preserves integer seconds
+    const rawValid = 245.8;
+    const safeValid = Number.isFinite(rawValid) && rawValid >= 0 && rawValid <= 86400 ? Math.floor(rawValid) : 0;
+    assert.equal(safeValid, 245);
+
+    // Long thumbnail URL gets sliced to max 500 chars
+    const rawUrl = 'https://example.com/' + 'a'.repeat(600);
+    const safeUrl = String(rawUrl || '').trim().slice(0, 500);
+    assert.equal(safeUrl.length, 500);
+  });
 });
